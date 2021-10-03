@@ -19,6 +19,22 @@ async def create_stream(name: str, fields: dict) -> str:
     await redis.close()
 
 
+async def write_stream(name: str, fields: dict) -> str:
+    await redis.xadd(name, fields)
+    await redis.close()
+    return f"{fields} writen to {name}"
+
+
+async def read_incoming_data():
+    while True:
+        events = await redis.xreadgroup( "group-1",  "consumer-1", { "stream-1":  ">"}, count = 10)
+        event_ids = []
+        for _, e in events:
+            for x in e:
+                event_ids.append(x[0])
+            await redis.xack( "stream-1",  "group-1", *event_ids)
+
+
 async def stream_info(stream: str) -> dict:
     response = await redis.xinfo_stream(stream)
     await redis.close()
@@ -92,6 +108,52 @@ async def subscribe(channels: list):
 
 async def publish(channels: list, message: dict):
     await redis.publish(*channels, message)
+
+
+async def consume_new_group_event(consumer: str, stream: str, group: str) -> list:
+    response = await redis.xreadgroup(group, consumer, {stream: ">"})
+    return response
+
+
+async def consume_pending_group_events(consumer: str, stream: str, group: str) -> list:
+    response = await redis.xreadgroup(group, consumer, {stream: "0"})
+    return response
+
+
+class Register(object):
+    def __init__(self, *args, **kwargs):
+        self.result = None
+        self.stream = kwargs.get("stream")
+        self.group = kwargs.get("group")
+
+    def __call__(self, fn):
+        async def wrap(*args, **kwargs):
+            await create_stream(self.stream, {"stream_created": True})
+            await create_group(self.stream, self.group)
+            kwargs["stream"] = self.stream
+            kwargs["group"] = self.group
+            self.result = await fn(*args, **kwargs)
+            return self.result
+        return wrap
+
+
+async def ack_stream(stream: str, group: str, ids: list):
+    data = await redis.xack(stream, group, *ids)
+    return data
+
+
+async def handle_consumer_data(consumer_data: list, stream: str, group: str):
+    pending_ids = []
+    pending_data = []
+    for _, e in consumer_data:
+        for x in e:
+            pending_ids.append(x[0])
+            pending_data.append(x[1])
+    if pending_ids:
+        await ack_stream(stream, group, pending_ids)
+    return pending_data
+
+
 
 
 
