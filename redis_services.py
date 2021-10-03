@@ -47,23 +47,23 @@ async def create_group(stream: str, group: str) -> str:
     return response
 
 
-async def groups_info(stream: str):
+async def groups_info(stream: str) -> dict:
     response = await redis.xinfo_groups(stream)
     await redis.close()
     return response
 
 
-async def delete_group(stream: str, group: str):
+async def delete_group(stream: str, group: str) -> str:
     await redis.xgroup_destroy(stream, group)
     return f"Group {group} deleted on stream {stream}"
 
 
-async def consumers_info(stream: str, group: str) :
+async def consumers_info(stream: str, group: str) -> dict:
     response = await redis.xinfo_consumers(stream, group)
     return response
 
 
-async def delete_consumer(stream: str, group: str, consumer: str):
+async def delete_consumer(stream: str, group: str, consumer: str) -> str:
     await redis.xgroup_delconsumer(stream, group, consumer)
     return f"Consumer {consumer} deleted on group {group}"
 
