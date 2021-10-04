@@ -25,16 +25,6 @@ async def write_stream(name: str, fields: dict) -> str:
     return f"{fields} writen to {name}"
 
 
-async def read_incoming_data():
-    while True:
-        events = await redis.xreadgroup( "group-1",  "consumer-1", { "stream-1":  ">"}, count = 10)
-        event_ids = []
-        for _, e in events:
-            for x in e:
-                event_ids.append(x[0])
-            await redis.xack( "stream-1",  "group-1", *event_ids)
-
-
 async def stream_info(stream: str) -> dict:
     response = await redis.xinfo_stream(stream)
     await redis.close()
