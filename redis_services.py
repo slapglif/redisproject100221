@@ -115,6 +115,7 @@ class Register(object):
         self.result = None
         self.stream = kwargs.get("stream")
         self.group = kwargs.get("group")
+        self.consumer = kwargs.get("consumer")
 
     def __call__(self, fn):
         async def wrap(*args, **kwargs):
@@ -122,6 +123,7 @@ class Register(object):
             await create_group(self.stream, self.group)
             kwargs["stream"] = self.stream
             kwargs["group"] = self.group
+            kwargs["consumer"] = self.consumer
             self.result = await fn(*args, **kwargs)
             return self.result
         return wrap
