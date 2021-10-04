@@ -9,7 +9,6 @@ def loop_in_thread(loop):
     while True:
         asyncio.set_event_loop(loop)
         loop.run_until_complete(watch_stream())
-        time.sleep(1)
 
 
 loop = asyncio.get_event_loop()
