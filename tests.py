@@ -39,10 +39,11 @@ async def test_destroy_group():
 @redis_services.Register(stream="stream-1", group="group-1", consumer="consumer-1")
 async def test_wrapper(*_, **kwargs):
     registration = SimpleNamespace(**kwargs)
-    consumer_data = await redis_services.consume_new_group_event(**kwargs)
-    await redis_services.write_stream(registration.stream, {"new_data": "handle_me_pls"})
-    response = await redis_services.handle_consumer_data(consumer_data, **kwargs)
-    print(response)
+    # consumer_data = await redis_services.consume_new_group_event(**kwargs)
+    # await redis_services.write_stream(registration.stream, {"new_data": "handle_me_pls"})
+    # response = await redis_services.handle_consumer_data(consumer_data, **kwargs)
+    # print(response)
+    await redis_services.write_stream(registration.stream, {"thing": 1})
 
 asyncio.run(test_wrapper())
 
