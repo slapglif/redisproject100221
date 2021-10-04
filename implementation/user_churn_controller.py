@@ -1,4 +1,4 @@
-from ..redis_services import Register, consume_new_group_event, handle_consumer_data
+from redis_services import Register, consume_new_group_event, handle_consumer_data
 from user_churn_service import handler_service
 
 
@@ -19,6 +19,7 @@ async def watch_stream(*_, **kwargs):
     response = await handle_consumer_data(consumer_data, **kwargs)
 
     # send data to callback function
-    await handler_service(response)
+    if response:
+        await handler_service(response)
 
     return response
