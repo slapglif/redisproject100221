@@ -134,7 +134,7 @@ async def ack_stream(stream: str, group: str, ids: list):
     return data
 
 
-async def handle_consumer_data(consumer_data: list, stream: str, group: str):
+async def handle_consumer_data(consumer_data: list, stream: str, group: str, consumer:str = None):
     pending_ids = []
     pending_data = []
     for _, e in consumer_data:

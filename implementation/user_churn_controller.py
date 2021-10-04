@@ -1,4 +1,4 @@
-from redis_services import Register, consume_new_group_event, handle_consumer_data
+from redis_services import Register, write_stream, consume_new_group_event, handle_consumer_data
 from user_churn_service import handler_service
 
 
@@ -10,8 +10,6 @@ async def watch_stream(*_, **kwargs):
     :return:
         response data from the stream
     """
-
-    # define consumer name
 
     # consume stream data
     consumer_data = await consume_new_group_event(**kwargs)
